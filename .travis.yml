@@ -4,15 +4,18 @@ matrix:
 
     - os: osx
       osx_image: xcode8
-      language: objective-c
+      language: c++
       compiler: clang
-
-before_install:
-  - ./before_install.sh
-
-install:
-  - ./install.sh
+      env:
+        - BUILD_NAME=good-case
+    - os: osx
+      osx_image: xcode8
+      language: c++
+      compiler: clang
+      env:
+        - BUILD_NAME=bad-case
 
 script:
-  - ./script.sh
+  - ./${BUILD_NAME}.sh
+
 

@@ -1,68 +1,74 @@
 cmake_minimum_required (VERSION 3.5)
 if (POLICY CMP0025)
-    cmake_policy(SET CMP0025 NEW)
+  # compiler on Mac OS X is now AppleClang
+  cmake_policy(SET CMP0025 NEW)
 endif ()
 if (POLICY CMP0054)
-    cmake_policy(SET CMP0054 NEW)
-endif()
-if (POLICY CMP0058)
-	# Ninja requires custom command byproducts to be explicit
-	cmake_policy(SET CMP0058 NEW)
+  # if variable behavior
+  cmake_policy(SET CMP0054 NEW)
 endif()
 if (POLICY CMP0068)
-    #mac os x rpath effect
-    cmake_policy(SET CMP0068 NEW)
-endif()
-if (POLICY CMP0069)
-    # INTERPROCEDURAL_OPTIMIZATION
-    cmake_policy(SET CMP0069 NEW)
-endif()
-if (POLICY CMP0070)
-    # file(GENERATE)
-    cmake_policy(SET CMP0070 NEW)
-endif()
-if (POLICY CMP0073)
-    # _LIB_DEPENDS
-    cmake_policy(SET CMP0073 NEW)
-endif()
-if (POLICY CMP0074)
-    # Packagename_ROOT
-    cmake_policy(SET CMP0074 NEW)
-endif()
-if (POLICY CMP0075)
-    cmake_policy(SET CMP0075 NEW)
+  #mac os x rpath effect
+  cmake_policy(SET CMP0068 NEW)
 endif()
 
-project(travis-osx C CXX)
+project(cmakeosx  LANGUAGES C CXX)
 
 set(CMAKE_MODULE_PATH
     ${CMAKE_CURRENT_SOURCE_DIR}/cmake
     ${CMAKE_MODULE_PATH})
-include(cotire)
 
-set(CMAKE_CONFIGURATION_TYPES "Debug;Release" CACHE STRING "Configs" FORCE)
 set(CMAKE_CXX_STANDARD 11)
 set(CMAKE_CXX_STANDARD_REQUIRED ON)
 
-if(CMAKE_COMPILER_IS_GNUCXX)
-    execute_process(COMMAND ${CMAKE_C_COMPILER} -dumpversion OUTPUT_VARIABLE GCC_VERSION)
-    if (GCC_VERSION VERSION_GREATER 5.1 OR GCC_VERSION VERSION_EQUAL 5.1)
-        message(STATUS "GNU C++ 5.1 or later detected. It uses C++11 New ABI.")
-        set(GNUCXX_NEW_ABI true)
-    endif()
-endif()
-if(CMAKE_CXX_COMPILER_ID MATCHES "Clang")
-    add_compile_options(-Wno-unused-command-line-argument)
-endif()
 if(CMAKE_CXX_COMPILER_ID STREQUAL "AppleClang")
     set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -std=c++11")
 endif()
 
 if(UNIX)
-    add_definitions(-D_FORTIFY_SOURCE)
     set(CMAKE_POSITION_INDEPENDENT_CODE ON)
 endif()
 
-add_executable(example example.c)
+add_library(z SHARED zlib/zlib.h)
+add_subdirectory(zlib)
+
+# Set project and C++ Standard properties
+set_target_properties(z PROPERTIES
+                      PROJECT_LABEL example
+                      VERSION 1.0
+                      SOVERSION 10
+                      ARCHIVE_OUTPUT_DIRECTORY ${CMAKE_CURRENT_BINARY_DIR}
+                      LIBRARY_OUTPUT_DIRECTORY ${CMAKE_CURRENT_BINARY_DIR}
+                      RUNTIME_OUTPUT_DIRECTORY ${CMAKE_CURRENT_BINARY_DIR}
+                      CXX_STANDARD 11
+                      CXX_STANDARD_REQUIRED YES
+)
+
+# OSX Framework specific properties
+set_target_properties(z PROPERTIES
+      FRAMEWORK TRUE
+      FRAMEWORK_VERSION A
+      MACOSX_FRAMEWORK_SHORT_VERSION_STRING 1.0
+      MACOSX_FRAMEWORK_BUNDLE_VERSION 1.0
+      MACOSX_FRAMEWORK_IDENTIFIER org.osgeo.libgdal
+      XCODE_ATTRIBUTE_INSTALL_PATH "@rpath"
+)
+set(CMAKE_MACOSX_RPATH ON)
+include(GNUInstallDirs)
+install(TARGETS z
+        EXPORT zlib-export
+        RUNTIME DESTINATION ${CMAKE_INSTALL_BINDIR}
+        ARCHIVE DESTINATION ${CMAKE_INSTALL_LIBDIR}
+        LIBRARY DESTINATION ${CMAKE_INSTALL_LIBDIR}
+        FRAMEWORK DESTINATION ${CMAKE_INSTALL_LIBDIR}
+)
+
+message(STATUS "CMAKE_SYSTEM_NAME: ${CMAKE_SYSTEM_NAME}")
+message(STATUS "CMAKE_INSTALL_PREFIX: ${CMAKE_INSTALL_PREFIX}")
+message(STATUS "CMAKE_CXX_COMPILER_ID: ${CMAKE_CXX_COMPILER_ID}")
+
+if(NOT CMAKE_CXX_COMPILER_ID STREQUAL "AppleClang")
+  message(FATAL_ERROR "Cannot determine compiler!!")
+endif()
 
 # vim: ts=4 sw=4 sts=4 et

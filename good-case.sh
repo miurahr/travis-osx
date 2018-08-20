@@ -4,10 +4,11 @@ set -e
 
 export PATH=/usr/local/bin:$PATH
 
-mkdir cmake-build-osx-debug
-cd cmake-build-osx-debug
+mkdir bad-case
+cd bad-case
 cmake \
   -DCMAKE_BUILD_TYPE=Debug \
   -DCMAKE_CXX_COMPILER_LAUNCHER=ccache \
   -DCMAKE_C_COMPILER_LAUNCHER=ccache \
+  -DCMAKE_INSTALL_PREFIX=$HOME/install-zlib \
   ../
