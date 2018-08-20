@@ -1,0 +1,18 @@
+matrix:
+  fast_finish: true
+  include:
+
+    - os: osx
+      osx_image: xcode8
+      language: objective-c
+      compiler: clang
+
+before_install:
+  - ./before_install.sh
+
+install:
+  - ./install.sh
+
+script:
+  - ./script.sh
+
