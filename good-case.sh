@@ -4,11 +4,7 @@ set -e
 
 export PATH=/usr/local/bin:$PATH
 
-mkdir bad-case
-cd bad-case
-cmake \
-  -DCMAKE_BUILD_TYPE=Debug \
-  -DCMAKE_CXX_COMPILER_LAUNCHER=ccache \
-  -DCMAKE_C_COMPILER_LAUNCHER=ccache \
-  -DCMAKE_INSTALL_PREFIX=$HOME/install-zlib \
-  ../
+mkdir good-case
+cd good-case
+echo run cmake -DCMAKE_INSTALL_PREFIX=\$HOME/install-zlib ../
+cmake -DCMAKE_INSTALL_PREFIX=$HOME/install-zlib ../
