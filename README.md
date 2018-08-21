@@ -5,4 +5,4 @@ When adding -DPREFIX=$HOME/install-dir to cmake command, it cannot find compiler
 
 You can see result at
 
-https://travis-ci.org/miurahr/travis-osx/builds/418684501
+https://travis-ci.org/miurahr/travis-osx/builds/418687479
